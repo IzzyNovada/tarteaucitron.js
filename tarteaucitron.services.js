@@ -125,6 +125,52 @@ tarteaucitron.services.amazon = {
     }
 };
 
+// amazon tracking links
+tarteaucitron.services.amazontracklink = {
+    "key": "amazontracklink",
+    "type": "ads",
+    "name": "Amazon (tracking links)",
+    "uri": "http://www.amazon.fr/gp/help/customer/display.html?ie=UTF8&*Version*=1&*entries*=0&nodeId=201149360",
+    "needConsent": true,
+    "cookies": [],
+    "js": function () {
+        "use strict";
+        tarteaucitron.fallback(['amazon_tracklink'], function (x) {
+            var tagID = x.getAttribute("tagid"),
+                productID = x.getAttribute("productid"),
+                content = '',
+                url = '//www.amazon.fr/gp/product/' + productID + '/?tag=' + tagID,
+                link = '',
+                nocookie = x.nextSibling; 
+
+            if (nocookie && nocookie.className == 'amazon_tracklink_nocookie' && nocookie.getAttribute("productid") == productID) {
+                content = nocookie.innerHTML;
+                nocookie.parentNode.removeChild(nocookie);
+            } else {
+                content = x.innerHTML;
+            }
+            
+            link = '<a href="' + url + '" target="_blank">' + content + '</a>';
+
+            return link;
+        });
+    },
+    "fallback": function () {
+        "use strict";
+        var id = 'amazontracklink';
+        tarteaucitron.fallback(['amazon_tracklink'], function (elem) {
+            var newlink = document.createElement('a');
+            newlink.href = '//www.amazon.fr/gp/product/' + elem.getAttribute("productid");
+            newlink.target = '_blank';
+            newlink.setAttribute('productid', elem.getAttribute('productid'));
+            newlink.className = 'amazon_tracklink_nocookie';
+            newlink.innerHTML = elem.innerHTML;
+            elem.parentNode.insertBefore(newlink, elem.nextSibling);
+            return tarteaucitron.engage(id);
+        });
+    }
+};
+
 // calameo
 tarteaucitron.services.calameo = {
     "key": "calameo",
